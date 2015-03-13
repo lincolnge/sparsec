@@ -1,16 +1,16 @@
 //
-//  sparsecTests.swift
-//  sparsecTests
+//  utilsTests.swift
+//  sparsec
 //
-//  Created by Mars Liu on 15/3/4.
+//  Created by Mars Liu on 15/3/10.
 //  Copyright (c) 2015年 Dwarf Artisan. All rights reserved.
 //
 
 import Cocoa
 import XCTest
 
-class sparsecTests: XCTestCase {
-    
+class elementsTests: XCTestCase {
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -20,16 +20,17 @@ class sparsecTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testString() {
 
+    func testExample() {
+        // This is an example of a functional test case.
+        XCTAssert(true, "Pass")
     }
-    
+
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measureBlock() {
             // Put the code you want to measure the time of here.
         }
     }
-    
+
 }
