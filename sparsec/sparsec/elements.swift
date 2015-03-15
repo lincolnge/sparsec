@@ -8,9 +8,23 @@
 
 import Foundation
 
-enum Result<T> {
-    case Success(T?)
-    case Failed
+enum Status{
+    case Success
+    case Failed(String?)
+}
+
+enum Data<T>{
+    case Value(T?)
+    case Eof
+}
+
+struct Result<T> {
+    let value : Data<T>
+    let status: Status
+}
+
+enum Exception {
+    case Failed(String)
     case Eof
 }
 

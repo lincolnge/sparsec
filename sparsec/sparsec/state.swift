@@ -8,8 +8,6 @@
 
 import Foundation
 
-
-
 class BasicState<S:CollectionType> {
     typealias ItemType = S.Generator.Element
     var container: S
@@ -28,25 +26,25 @@ class BasicState<S:CollectionType> {
 
     func next() -> Result<ItemType> {
         if self.pos == container.endIndex {
-            return Result<ItemType>.Eof
+            return Result(value:Data.Eof, status: Status.Failed(nil))
         }
         self.pos = self.pos.successor()
         var item = container[self.pos]
-        return Result<ItemType>.Success(item)
+        return Result(value: Data.Value(item), status: Status.Success)
     }
     func next(pred : Props<ItemType>.Pred) -> Result<ItemType> {
         if self.pos == container.endIndex {
-            return Result<ItemType>.Eof
+            return Result(value:Data.Eof, status:Status.Failed(nil))
         }
         var item = container[self.pos]
         var match = pred(item)
         if match {
             self.pos.successor()
-            return Result.Success(item)
+            return Result(value: Data.Value(item), status: Status.Success)
         }
-        return Result.Failed
+        return Result(value: Data.Value(item), status: Status.Failed(nil))
     }
-    subscript(idx: S.Index) -> ItemType {
+    subscript(idx: S.Index) -> ItemType? {
         get {
             return container[idx]
         }
