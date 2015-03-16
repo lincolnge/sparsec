@@ -18,15 +18,12 @@ enum Data<T>{
     case Eof
 }
 
-struct Result<T> {
-    let value : Data<T>
+struct Result<S:CollectionType> {
+    let value : Data<S.Generator.Element>
+    let pos : S.Index?
     let status: Status
 }
 
-enum Exception {
-    case Failed(String)
-    case Eof
-}
 
 struct Props<T> {
     typealias Pred = (T)->Bool
@@ -39,6 +36,6 @@ extension String.UnicodeScalarView:CollectionType{}
 protocol Parsec {
     typealias S:CollectionType
     typealias ItemType = S.Generator.Element
-    func walk (state: BasicState<S>) -> Result<ItemType>
+    func walk (state: BasicState<S>) -> Result<S>
 }
 
