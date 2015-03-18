@@ -24,7 +24,7 @@ class BasicState<S:CollectionType> {
         }
     }
 
-    func next() -> Result<S> {
+    func next() -> Result<ItemType, S> {
         if self.pos == self.container.endIndex.successor() {
             var message = "Eof:\(self.pos)"
             return Result(value:Data<ItemType>.Eof, pos:self.pos, status: Status.Failed(message))
@@ -34,7 +34,7 @@ class BasicState<S:CollectionType> {
         return Result(value: Data.Value(item), pos:self.pos, status: Status.Success)
     }
 
-    func next(pred : Props<ItemType>.Pred) -> Result<S> {
+    func next(pred : Props1<ItemType>.Pred) -> Result<ItemType, S> {
         if self.pos == self.container.endIndex.successor() {
             var message = "Eof:\(self.pos)"
             return Result(value:Data<ItemType>.Eof, pos:self.pos, status: Status.Failed(message))
@@ -58,7 +58,7 @@ class BasicState<S:CollectionType> {
 class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
         BasicState<S> {
     typealias ItemType = S.Generator.Element
-    var newline:Props<ItemType>.Pred
+    var newline:Props1<ItemType>.Pred
     var lines:[S.Index] = []
     var row, col : S.Index
     var line: S.Index {
@@ -71,7 +71,7 @@ class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
             return col
         }
     }
-    init(_ container: S, newline: Props<ItemType>.Pred){
+    init(_ container: S, newline: Props1<ItemType>.Pred){
         self.newline = newline
         self.row = container.startIndex
         self.col = container.startIndex

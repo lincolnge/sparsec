@@ -13,6 +13,7 @@
 		3907CE551AAEF7AC00CD70A3 /* elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* elements.swift */; };
 		3907CE561AAEF7AC00CD70A3 /* elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* elements.swift */; };
 		3907CE591AAEF8A500CD70A3 /* elementsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE581AAEF8A500CD70A3 /* elementsTests.swift */; };
+		39C13F091AB9774500DFA55D /* combinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C6B5071AB6B32000F566A0 /* combinator.swift */; };
 		39D0F3181AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39D0F3191AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39DB5C451AA6D2860069AA30 /* sparsec.h in Headers */ = {isa = PBXBuildFile; fileRef = 39DB5C441AA6D2860069AA30 /* sparsec.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -36,6 +37,7 @@
 		3907CE541AAEF7AC00CD70A3 /* elements.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = elements.swift; sourceTree = "<group>"; };
 		3907CE581AAEF8A500CD70A3 /* elementsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = elementsTests.swift; sourceTree = "<group>"; };
 		39A5F5F41AAC46F80050D65D /* parsec.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = parsec.playground; sourceTree = "<group>"; };
+		39C6B5071AB6B32000F566A0 /* combinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = combinator.swift; sourceTree = "<group>"; };
 		39D0F3171AAD6992003B56CE /* state.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = state.swift; sourceTree = "<group>"; };
 		39DB5C3F1AA6D2860069AA30 /* sparsec.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = sparsec.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		39DB5C431AA6D2860069AA30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				3907CE541AAEF7AC00CD70A3 /* elements.swift */,
 				39D0F3171AAD6992003B56CE /* state.swift */,
 				3907CE4C1AAEF2D200CD70A3 /* atom.swift */,
+				39C6B5071AB6B32000F566A0 /* combinator.swift */,
 			);
 			path = sparsec;
 			sourceTree = "<group>";
@@ -230,6 +233,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3907CE551AAEF7AC00CD70A3 /* elements.swift in Sources */,
+				39C13F091AB9774500DFA55D /* combinator.swift in Sources */,
 				3907CE4D1AAEF2D200CD70A3 /* atom.swift in Sources */,
 				39D0F3181AAD6992003B56CE /* state.swift in Sources */,
 			);
