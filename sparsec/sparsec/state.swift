@@ -24,29 +24,27 @@ class BasicState<S:CollectionType> {
         }
     }
 
-    func next() -> Result<ItemType, S> {
+    func next() -> ItemType? {
         if self.pos == self.container.endIndex.successor() {
-            var message = "Eof:\(self.pos)"
-            return Result(value:Data<ItemType>.Eof, pos:self.pos, status: Status.Failed(message))
+            return nil
         }
         var item = container[self.pos]
         self.pos = self.pos.successor()
-        return Result(value: Data.Value(item), pos:self.pos, status: Status.Success)
+        return item
     }
 
-    func next(pred : Props1<ItemType>.Pred) -> Result<ItemType, S> {
+    func next(pred : Props1<ItemType>.Pred) -> PredResult<ItemType> {
         if self.pos == self.container.endIndex.successor() {
-            var message = "Eof:\(self.pos)"
-            return Result(value:Data<ItemType>.Eof, pos:self.pos, status: Status.Failed(message))
+            return PredResult<ItemType>.Eof
         }
         var item = container[self.pos]
         self.pos = self.pos.successor()
         var match = pred(item)
         if match {
             self.pos.successor()
-            return Result(value: Data.Value(item), pos:self.pos, status: Status.Success)
+            return PredResult.Success(item)
         }
-        return Result(value: Data.Value(item), pos:self.pos, status: Status.Failed(nil))
+        return PredResult.Failed
     }
     subscript(idx: S.Index) -> ItemType? {
         get {

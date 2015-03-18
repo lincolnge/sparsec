@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3907CE4D1AAEF2D200CD70A3 /* atom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4C1AAEF2D200CD70A3 /* atom.swift */; };
 		3907CE4F1AAEF38A00CD70A3 /* atomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4E1AAEF38A00CD70A3 /* atomTests.swift */; };
-		3907CE501AAEF39000CD70A3 /* atom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4C1AAEF2D200CD70A3 /* atom.swift */; };
 		3907CE551AAEF7AC00CD70A3 /* elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* elements.swift */; };
 		3907CE561AAEF7AC00CD70A3 /* elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* elements.swift */; };
 		3907CE591AAEF8A500CD70A3 /* elementsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE581AAEF8A500CD70A3 /* elementsTests.swift */; };
-		39C13F091AB9774500DFA55D /* combinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C6B5071AB6B32000F566A0 /* combinator.swift */; };
+		3923ADDC1AB9E2F500D3D0D4 /* atom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4C1AAEF2D200CD70A3 /* atom.swift */; };
+		3923ADDD1AB9E2F600D3D0D4 /* atom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4C1AAEF2D200CD70A3 /* atom.swift */; };
+		3923ADDE1AB9EF9900D3D0D4 /* combinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C6B5071AB6B32000F566A0 /* combinator.swift */; };
+		3923ADDF1AB9EF9A00D3D0D4 /* combinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C6B5071AB6B32000F566A0 /* combinator.swift */; };
 		39D0F3181AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39D0F3191AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39DB5C451AA6D2860069AA30 /* sparsec.h in Headers */ = {isa = PBXBuildFile; fileRef = 39DB5C441AA6D2860069AA30 /* sparsec.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -232,9 +233,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3923ADDC1AB9E2F500D3D0D4 /* atom.swift in Sources */,
+				3923ADDE1AB9EF9900D3D0D4 /* combinator.swift in Sources */,
 				3907CE551AAEF7AC00CD70A3 /* elements.swift in Sources */,
-				39C13F091AB9774500DFA55D /* combinator.swift in Sources */,
-				3907CE4D1AAEF2D200CD70A3 /* atom.swift in Sources */,
 				39D0F3181AAD6992003B56CE /* state.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,11 +244,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3923ADDD1AB9E2F600D3D0D4 /* atom.swift in Sources */,
 				3907CE561AAEF7AC00CD70A3 /* elements.swift in Sources */,
 				39DB5C521AA6D2860069AA30 /* sparsecTests.swift in Sources */,
 				39D0F3191AAD6992003B56CE /* state.swift in Sources */,
+				3923ADDF1AB9EF9A00D3D0D4 /* combinator.swift in Sources */,
 				3907CE591AAEF8A500CD70A3 /* elementsTests.swift in Sources */,
-				3907CE501AAEF39000CD70A3 /* atom.swift in Sources */,
 				3907CE4F1AAEF38A00CD70A3 /* atomTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

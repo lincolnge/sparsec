@@ -27,14 +27,12 @@ class atomTests: XCTestCase {
         let state = BasicState(data.unicodeScalars)
         let c:UnicodeScalar = "T"
         let t = Char(c)
-        var re = t.walk(state)
-        switch re.status {
-        case .Failed:
-            XCTAssert(false, "excpet t parsec got 't' but failed")
+        var (re, status) = t.walk(state)
+        switch status {
         case .Success:
             XCTAssert(true, "pass")
-        default:
-            XCTAssert(false, "excpet t parsec got 't' but got \(re.value)")
+        case let .Failed(msg):
+            XCTAssert(false, "excpet t parsec got 't' but got error: \(msg)")
         }
     }
     
@@ -43,14 +41,12 @@ class atomTests: XCTestCase {
         let data = "07500"
         let state = BasicState(data.unicodeScalars)
         let d = Digit()
-        var re = d.walk(state)
-        switch re.status {
-        case .Failed:
-            XCTAssert(false, "excpet digit parsec got a digit but failed")
+        var (re, status) = d.walk(state)
+        switch status {
+        case let .Failed(msg):
+            XCTAssert(false, "excpet digit parsec got a digit but error: \(msg)")
         case .Success:
             XCTAssert(true, "pass")
-        default:
-            XCTAssert(false, "excpet digit parsec got a digit but got \(re.value)")
         }
     }
 

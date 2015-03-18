@@ -8,22 +8,16 @@
 
 import Foundation
 
-enum Status{
-    case Success
-    case Failed(String?)
-}
-
-enum Data<T>{
-    case Value(T?)
+enum PredResult<T>{
+    case Success(T)
+    case Failed
     case Eof
 }
 
-struct Result<E, S:CollectionType> {
-    let value : Data<E>
-    let pos : S.Index?
-    let status: Status
+enum ParsecStatus{
+    case Success
+    case Failed(String)
 }
-
 
 struct Props1<T> {
     typealias Pred = (T)->Bool
@@ -39,7 +33,7 @@ extension String.UnicodeScalarView:CollectionType{}
 
 protocol Parsec {
     typealias S:CollectionType
-    typealias ItemType = S.Generator.Element
-    func walk (state: BasicState<S>) -> Result<ItemType, S>
+    typealias ItemType
+    func walk (state: BasicState<S>) -> (ItemType?, ParsecStatus)
 }
 

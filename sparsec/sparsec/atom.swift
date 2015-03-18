@@ -20,8 +20,16 @@ struct One<S:CollectionType where S.Generator.Element:Equatable>:Parsec {
     typealias ItemType = S.Generator.Element
     var element:S.Generator.Element
     let pred:Props1<ItemType>.Pred
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
-        return state.next(self.pred)
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        var pre = state.next(self.pred)
+        switch pre {
+        case let .Success(value):
+            return (value, ParsecStatus.Success)
+        case .Failed:
+            return (nil, ParsecStatus.Failed("Element \(self.element) Missmatch."))
+        case .Eof:
+            return (nil, ParsecStatus.Failed("Except \(self.element) but Eof."))
+        }
     }
     
     init(_ element:ItemType){
@@ -36,20 +44,13 @@ struct One<S:CollectionType where S.Generator.Element:Equatable>:Parsec {
 
 struct Eof<S:CollectionType>:Parsec {
     typealias ItemType = S.Generator.Element
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
-        var re = state.next()
-        switch re.status {
-        case .Failed:
-            switch re.value {
-            case .Eof:
-                return Result<ItemType, S>(value:Data.Eof, pos:state.pos, status:Status.Success)
-            default:
-                return Result<ItemType, S>(value: re.value, pos:state.pos, status: re.status)
-            }
-        default:
-            var message = "Except EOF but \(re.value) at \(state.pos)"
-            var f:Status = .Failed(message)
-            return Result<ItemType, S>(value:re.value, pos:state.pos, status:f)
+    typealias StateType = BasicState<S>
+    func walk(state: StateType) -> (ItemType?, ParsecStatus) {
+        var item = state.next()
+        if item == nil {
+            return (nil, ParsecStatus.Success)
+        } else {
+            return (item, ParsecStatus.Failed("Except Eof but \(item)"))
         }
     }
 }
@@ -60,8 +61,16 @@ struct Digit: Parsec {
     var pred: Props1<ItemType>.Pred = {(c:ItemType)->Bool in
         return digits.longCharacterIsMember(c.value)
     }
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
-        return state.next(pred)
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        var pre = state.next(pred)
+        switch pre {
+        case let .Success(value):
+            return (value, ParsecStatus.Success)
+        case .Failed:
+            return (nil, ParsecStatus.Failed("Except digit at \(state.pos) but not match."))
+        case .Eof:
+            return (nil, ParsecStatus.Failed("Except digit but Eof."))
+        }
     }
 }
 
@@ -71,8 +80,16 @@ struct Letter: Parsec {
     var pred: Props1<ItemType>.Pred = {(c:ItemType)->Bool in
         return letters.longCharacterIsMember(c.value)
     }
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
-        return state.next(pred)
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        var pre = state.next(pred)
+        switch pre {
+        case let .Success(value):
+            return (value, ParsecStatus.Success)
+        case .Failed:
+            return (nil, ParsecStatus.Failed("Except letter at \(state.pos) but not match."))
+        case .Eof:
+            return (nil, ParsecStatus.Failed("Except letter but Eof."))
+        }
     }
 }
 
@@ -82,49 +99,35 @@ struct Text: Parsec {
     typealias ItemType = String.UnicodeScalarView
     typealias S = String.UnicodeScalarView
     var value:ItemType
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
         for idx in value.startIndex...value.endIndex {
             var re = state.next()
-            switch re.status {
-            case .Success:
-                switch re.value {
-                case let .Value(chr):
-                    if chr != value[idx] {
-                        return Result(value: Data.Value(nil), pos: state.pos, status: Status.Failed("Text \(value) mismatch."))
-                    }
-                default: //It means Eof
-                    return Result(value: Data.Value(nil), pos: state.pos, status: Status.Failed("Text \(value) mismatch. Got Eof"))
+            if re == nil {
+                return (nil, ParsecStatus.Failed("Except Text \(value) but Eof"))
+            } else {
+                var rune = re!
+                if rune != value[idx] {
+                    return (nil, ParsecStatus.Failed("Text[\(idx)]:\(value[idx]) not match Data[\(state.pos)]:\(rune)"))
                 }
-            default: //It means Eof or other error.
-                return Result(value: Data.Value(nil), pos: state.pos, status: Status.Failed("Text \(value) mismatch. Got \(re)"))
             }
         }
-        return Result<ItemType, S>(value: Data<ItemType>.Value(value), pos: state.pos, status: Status.Success)
+        return (value, ParsecStatus.Success)
     }
 }
 
 struct Return<E, S:CollectionType>:Parsec{
     typealias ItemType = E
     let value:ItemType?
-    func walk(state: BasicState<S>) -> Result<E, S> {
-        return Result<E, S>(value:Data.Value(value), pos: state.pos, status: Status.Success)
-    }
-}
-
-struct ReturnData<E, S:CollectionType>:Parsec{
-    typealias ItemType = E
-    let data:Data<ItemType>
-    func walk(state: BasicState<S>) -> Result<E, S> {
-        return Result<E, S>(value:data, pos: state.pos, status: Status.Success)
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        return (value, ParsecStatus.Success)
     }
 }
 
 struct Fail<E, S:CollectionType>:Parsec {
     typealias ItemType = E
-    let value:ItemType?
-    let message:String?
-    func walk(state: BasicState<S>) -> Result<ItemType, S> {
-        return Result<ItemType, S>(value:Data.Value(value), pos: state.pos, status: Status.Failed(message))
+    let message:String
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        return (nil, ParsecStatus.Failed(message))
     }
 }
 
