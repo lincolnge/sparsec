@@ -186,3 +186,29 @@ struct Many1<P:Parsec, S:CollectionType where P.S==S>:Parsec {
         return Bind(prefix: parsec, binder:head).walk(state)
     }
 }
+
+struct SepBy<P:Parsec, Sep:Parsec, S:CollectionType where P.S==S, Sep.S==S>:Parsec {
+    typealias ItemType = [P.ItemType?]
+    let parsec:P
+    let sep:Sep
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        return Option(value: [], parsec: SepBy1<P, Sep, S>(parsec:parsec, sep:sep)).walk(state)
+    }
+}
+
+struct SepBy1<P:Parsec, Sep:Parsec, S:CollectionType where P.S==S, Sep.S==S>:Parsec {
+    typealias ItemType = [P.ItemType?]
+    let parsec:P
+    let sep:Sep
+    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+        var head = {(value: P.ItemType?)->Bind<Many<Bind_<Sep, P, S>, S>, Return<ItemType, S>, S> in
+            var tail = {(data:ItemType?)->Return<ItemType, S> in
+                var buf = data!
+                buf.append(value)
+                return Return<ItemType, S>(value: buf)
+            }
+            return Bind(prefix:Many(parsec:Bind_(prefix:self.sep, parsec:self.parsec)), binder:tail)
+        }
+        return Bind(prefix:parsec, binder:head).walk(state)
+    }
+}
