@@ -26,8 +26,8 @@ class atomTests: XCTestCase {
         let data = "This is a String."
         let state = BasicState(data.unicodeScalars)
         let c:UnicodeScalar = "T"
-        let t = Char(c)
-        var (re, status) = t.walk(state)
+        let t = char(c)
+        var (re, status) = t(state)
         switch status {
         case .Success:
             XCTAssert(true, "pass")
@@ -40,8 +40,8 @@ class atomTests: XCTestCase {
         // This is an example of a functional test case.
         let data = "07500"
         let state = BasicState(data.unicodeScalars)
-        let d = Digit()
-        var (re, status) = d.walk(state)
+        let d = digit
+        var (re, status) = d(state)
         switch status {
         case let .Failed(msg):
             XCTAssert(false, "excpet digit parsec got a digit but error: \(msg)")

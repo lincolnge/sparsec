@@ -8,54 +8,48 @@
 
 import Foundation
 
-struct Try<S:CollectionType, P:Parsec where P.S==S>:Parsec {
-    typealias ItemType=P.ItemType
-    let parsec: P
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+func try<ItemType, S:CollectionType>(parsec: Parsec<ItemType, S>.Parser) -> Parsec<ItemType, S>.Parser {
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
         var p = state.pos
-        var (re, status) = self.parsec.walk(state)
+        var (re, status) = parsec(state)
         switch status {
         case .Failed:
             state.pos = p
-            return (re, status)
+            fallthrough
         default:
             return (re, status)
         }
     }
 }
 
-struct Either<S:CollectionType, L:Parsec, R:Parsec
-                where R.S==S, L.S==S, L.ItemType==R.ItemType>:Parsec {
-    typealias ItemType=L.ItemType
-    let left:L
-    let right:R
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var p = state.pos
-        var (re, status) = self.left.walk(state)
-        switch status {
-        case .Success:
-            return (re, ParsecStatus.Success)
-        default:
-            if state.pos == p {
-                return self.right.walk(state)
-            } else {
-                return (re, status)
+func either<ItemType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, y: Parsec<ItemType, S>.Parser)
+    -> Parsec<ItemType, S>.Parser {
+        return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+            var p = state.pos
+            var (re, status) = x(state)
+            switch status {
+            case .Success:
+                return (re, ParsecStatus.Success)
+            default:
+                if state.pos == p {
+                    return y(state)
+                } else {
+                    return (re, status)
+                }
             }
+
         }
-    }
 }
 
 infix operator <|> { associativity left }
-func <|><S:CollectionType, L:Parsec, R:Parsec where L.S==S, R.S==S, L.ItemType==R.ItemType>(left: L, right: R)  -> Either<S, L, R> {
-    return Either<S, L, R>(left: left, right: right)
+func <|><ItemType, S:CollectionType >(left: Parsec<ItemType, S>.Parser,
+        right: Parsec<ItemType, S>.Parser)  -> Parsec<ItemType, S>.Parser {
+    return either(left, right)
 }
 
-struct Otherwise<S:CollectionType, P:Parsec where P.S==S>:Parsec {
-    typealias ItemType=P.ItemType
-    let parsec:P
-    let message:String
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var (re, status) = self.parsec.walk(state)
+func otherwise<ItemType, S:CollectionType >(x:Parsec<ItemType, S>.Parser, message:String)->Parsec<ItemType, S>.Parser {
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+        var (re, status) = x(state)
         switch status {
         case .Success:
             return (re, status)
@@ -66,23 +60,19 @@ struct Otherwise<S:CollectionType, P:Parsec where P.S==S>:Parsec {
 }
 
 infix operator <?> { associativity left }
-func <?><S:CollectionType, P:Parsec where P.S==S>(parsec: P, message: String)  -> Otherwise<S, P> {
-    return Otherwise<S, P>(parsec:parsec, message:message)
+func <?><ItemType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, message: String)  -> Parsec<ItemType, S>.Parser {
+    return otherwise(x, message)
 }
 
-struct Option<P:Parsec, S:CollectionType where P.S==S>:Parsec {
-    typealias ItemType=P.ItemType
-    let value:ItemType?
-    let parsec:P
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        return Either(left: parsec, right: Return(value: value)).walk(state)
+func option<ItemType, S:CollectionType>(parsec:Parsec<ItemType, S>.Parser, value:ItemType?) -> Parsec<ItemType, S>.Parser {
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+        return either(parsec, pack(value))(state)
     }
 }
 
-struct OneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
-        where S.Generator.Element==ItemType, C.Generator.Element==ItemType>: Parsec {
-    let elements:C
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+func oneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
+    where S.Generator.Element==ItemType, C.Generator.Element==ItemType>(elements:C)->Parsec<ItemType, S>.Parser {
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
         var re = state.next()
         if re == nil {
             return (nil, ParsecStatus.Failed("Except one of [\(elements)] but Eof"))
@@ -97,10 +87,9 @@ struct OneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
     }
 }
 
-struct NoneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
-        where C.Generator.Element==ItemType, S.Generator.Element==ItemType>:Parsec {
-    let elements:C
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+func noneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
+        where C.Generator.Element==ItemType, S.Generator.Element==ItemType>(elements:C)->Parsec<ItemType, S>.Parser {
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
         var re = state.next()
         if re == nil {
             return (nil, ParsecStatus.Failed("Try to check none of [\(elements)] but Eof"))
@@ -112,103 +101,95 @@ struct NoneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
                 return (e, ParsecStatus.Failed(message))
             }
         }
-        return (nil, ParsecStatus.Success)
+        return (re, ParsecStatus.Success)
     }
 }
 
-struct Bind<Pre:Parsec, P:Parsec, S:CollectionType where Pre.S==S, P.S==S>:Parsec{
-    typealias ItemType=P.ItemType
-    typealias Binder = (Pre.ItemType?)->P
-    let prefix: Pre
-    let binder: Binder
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var (re, status) = self.prefix.walk(state)
+func bind<ItemType, ReType, S:CollectionType >(x:Parsec<ItemType, S>.Parser,
+        binder:(ItemType?)->Parsec<ReType, S>.Parser) -> Parsec<ReType, S>.Parser{
+    return {(state: BasicState<S>) -> (ReType?, ParsecStatus) in
+        var (re, status) = x(state)
         switch status {
         case .Success:
-            var postfix = self.binder(re)
-            return postfix.walk(state)
+            var postfix = binder(re)
+            return postfix(state)
         default:
             return (nil, status)
         }
     }
 }
 
-struct Bind_<Pre:Parsec, P:Parsec, S:CollectionType where Pre.S==S, P.S==S>:Parsec{
-    typealias ItemType = P.ItemType
-    let prefix: Pre
-    let parsec: P
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var (re, status) = self.prefix.walk(state)
+infix operator >>= { associativity left }
+func >>=<ItemType, ReType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, binder:(ItemType?)->Parsec<ReType, S>.Parser)  -> Parsec<ReType, S>.Parser {
+    return bind(x, binder)
+}
+
+func bind_<ItemType, ReType, S:CollectionType >(x: Parsec<ItemType, S>.Parser,
+        y:Parsec<ReType, S>.Parser)->Parsec<ReType, S>.Parser{
+    return {(state: BasicState<S>) -> (ReType?, ParsecStatus) in
+        var (re, status) = x(state)
         switch status {
         case .Success:
-            return parsec.walk(state)
+            return y(state)
         default:
             return (nil, status)
         }
     }
 }
+infix operator >> { associativity left }
+func >><ItemType, ReType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, y:Parsec<ReType, S>.Parser)  -> Parsec<ReType, S>.Parser {
+    return x >> y
+}
 
-struct Between<B:Parsec, E:Parsec, P:Parsec, S:CollectionType
-    where B.S==S, E.S==S, P.S==S> :Parsec{
-    typealias ItemType = P.ItemType
-    let begin:B
-    let end:E
-    let parsec:P
-
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var keep = {(data:ItemType?)->Bind_<E, Return<ItemType, S>,  S> in
-            return Bind_(prefix:self.end, parsec:Return(value:data))
+func between<ItemType, S:CollectionType>(b:Parsec<ItemType, S>.Parser,
+        e:Parsec<ItemType, S>.Parser,
+        p:Parsec<ItemType, S>.Parser)->Parsec<ItemType, S>.Parser{
+    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+        var keep = {(data:ItemType?)->Parsec<ItemType, S>.Parser in
+            return bind_(e, pack(data))
         }
-        return Bind_(prefix:begin, parsec:Bind(prefix:parsec, binder:keep)).walk(state)
+        return (b >> (p>>=keep))(state)
     }
 }
 
-struct Many<P:Parsec, S:CollectionType where P.S==S>:Parsec {
-    typealias ItemType=[P.ItemType?]
-    let parsec:P
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        return Option(value: [], parsec:Many1<P, S>(parsec:self.parsec)).walk(state)
+func many<ItemType, S:CollectionType >(p:Parsec<ItemType, S>.Parser) -> Parsec<[ItemType?], S>.Parser {
+    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+        return option(many1(p), [])(state)
     }
 }
 
-struct Many1<P:Parsec, S:CollectionType where P.S==S>:Parsec {
-    typealias ItemType=[P.ItemType?]
-    let parsec:P
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var head = {(value:P.ItemType?) -> Bind<Many<P, S>, Return<ItemType, S>, S> in
-            var tail = {(data:ItemType?)->Return<ItemType, S> in
-                var val = data
-                val!.append(value)
-                return Return<ItemType, S>(value: val)
+func many1<ItemType, S>(p: Parsec<ItemType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
+    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+        var head = {(value:ItemType?) -> Parsec<[ItemType?], S>.Parser in
+            var tail = {(data:[ItemType?]?)->Parsec<[ItemType?], S>.Parser in
+                var buf = data
+                buf!.append(value)
+                return pack(buf)
             }
-            return Bind(prefix:Many(parsec: self.parsec), binder:tail)
+            return many(p) >>= tail
         }
-        return Bind(prefix: parsec, binder:head).walk(state)
+        return (p >>= head)(state)
     }
 }
 
-struct SepBy<P:Parsec, Sep:Parsec, S:CollectionType where P.S==S, Sep.S==S>:Parsec {
-    typealias ItemType = [P.ItemType?]
-    let parsec:P
-    let sep:Sep
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        return Option(value: [], parsec: SepBy1<P, Sep, S>(parsec:parsec, sep:sep)).walk(state)
+func sepBy<ItemType, SepType, S:CollectionType>(p: Parsec<ItemType, S>.Parser,
+        sep:Parsec<SepType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
+    return  {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+        return option(sepBy1(p, sep), [])(state)
     }
 }
 
-struct SepBy1<P:Parsec, Sep:Parsec, S:CollectionType where P.S==S, Sep.S==S>:Parsec {
-    typealias ItemType = [P.ItemType?]
-    let parsec:P
-    let sep:Sep
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var head = {(value: P.ItemType?)->Bind<Many<Bind_<Sep, P, S>, S>, Return<ItemType, S>, S> in
-            var tail = {(data:ItemType?)->Return<ItemType, S> in
+func sepBy1<ItemType, SepType, S:CollectionType>(p: Parsec<ItemType, S>.Parser,
+        sep:Parsec<SepType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
+    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+        var head = {(value: ItemType?)->Parsec<[ItemType?], S>.Parser in
+            var tail = {(data:[ItemType?]?)->Parsec<[ItemType?], S>.Parser in
                 var buf = data!
                 buf.append(value)
-                return Return<ItemType, S>(value: buf)
+                return pack(buf)
             }
-            return Bind(prefix:Many(parsec:Bind_(prefix:self.sep, parsec:self.parsec)), binder:tail)
+            return (many(sep >> p) >>= tail)
         }
-        return Bind(prefix:parsec, binder:head).walk(state)
+        return (p >>= head)(state)
     }
 }

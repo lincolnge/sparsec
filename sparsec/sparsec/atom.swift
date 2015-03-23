@@ -8,106 +8,63 @@
 
 import Foundation
 
-let letters = NSCharacterSet.letterCharacterSet()
-let digits = NSCharacterSet.decimalDigitCharacterSet()
 func equals<T:Equatable>(a:T)->Props1<T>.Pred{
     return {(x:T)->Bool in
         return a==x
     }
 }
 
-struct One<S:CollectionType where S.Generator.Element:Equatable>:Parsec {
-    typealias ItemType = S.Generator.Element
-    var element:S.Generator.Element
-    let pred:Props1<ItemType>.Pred
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var pre = state.next(self.pred)
-        switch pre {
-        case let .Success(value):
-            return (value, ParsecStatus.Success)
+func one<ItemType:Equatable, S:CollectionType where S.Generator.Element==ItemType>(one: ItemType)->Parsec<ItemType, S>.Parser{
+    var pred = equals(one)
+    return {(state: BasicState<S>)->(ItemType?, ParsecStatus) in
+        var re = state.next(pred)
+        switch re {
+        case .Success:
+            return (one, ParsecStatus.Success)
         case .Failed:
-            return (nil, ParsecStatus.Failed("Element \(self.element) Missmatch."))
+            return (nil, ParsecStatus.Failed("Except \(one) but \(state[state.pos]) missmatch."))
         case .Eof:
-            return (nil, ParsecStatus.Failed("Except \(self.element) but Eof."))
-        }
-    }
-    
-    init(_ element:ItemType){
-        self.element = element
-        self.pred = equals(element)
-    }
-    init(_ element:ItemType , subject:(ItemType)->Props1<ItemType>.Pred){
-        self.element = element
-        self.pred = subject(element)
-    }
-}
-
-struct Eof<S:CollectionType>:Parsec {
-    typealias ItemType = S.Generator.Element
-    typealias StateType = BasicState<S>
-    func walk(state: StateType) -> (ItemType?, ParsecStatus) {
-        var item = state.next()
-        if item == nil {
-            return (nil, ParsecStatus.Success)
-        } else {
-            return (item, ParsecStatus.Failed("Except Eof but \(item)"))
+            return (nil, ParsecStatus.Failed("Except \(one) but \(state[state.pos]) Eof."))
         }
     }
 }
 
-struct Digit: Parsec {
-    typealias ItemType = UnicodeScalar
-    typealias S = String.UnicodeScalarView
-    var pred: Props1<ItemType>.Pred = {(c:ItemType)->Bool in
-        return digits.longCharacterIsMember(c.value)
-    }
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var pre = state.next(pred)
-        switch pre {
-        case let .Success(value):
-            return (value, ParsecStatus.Success)
+func subject<ItemType:Equatable, S:CollectionType where S.Generator.Element==ItemType >
+        (one: ItemType, curry:(ItemType)->(ItemType)->Bool)->Parsec<ItemType, S>.Parser {
+    var pred:(ItemType)->Bool = curry(one)
+    return {(state: BasicState<S>)->(ItemType?, ParsecStatus) in
+        var re = state.next(pred)
+        switch re {
+        case .Success:
+            return (one, ParsecStatus.Success)
         case .Failed:
-            return (nil, ParsecStatus.Failed("Except digit at \(state.pos) but not match."))
+            return (nil, ParsecStatus.Failed("Except \(one) but \(state[state.pos]) missmatch."))
         case .Eof:
-            return (nil, ParsecStatus.Failed("Except digit but Eof."))
+            return (nil, ParsecStatus.Failed("Except \(one) but \(state[state.pos]) Eof."))
         }
     }
 }
 
-struct Letter: Parsec {
-    typealias ItemType = UnicodeScalar
-    typealias S = String.UnicodeScalarView
-    var pred: Props1<ItemType>.Pred = {(c:ItemType)->Bool in
-        return letters.longCharacterIsMember(c.value)
-    }
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        var pre = state.next(pred)
-        switch pre {
-        case let .Success(value):
-            return (value, ParsecStatus.Success)
-        case .Failed:
-            return (nil, ParsecStatus.Failed("Except letter at \(state.pos) but not match."))
-        case .Eof:
-            return (nil, ParsecStatus.Failed("Except letter but Eof."))
-        }
+func eof<ItemType, S:CollectionType where S.Generator.Element==ItemType>(state: BasicState<S>)->(ItemType?, ParsecStatus){
+    var item = state.next()
+    if item == nil {
+        return (nil, ParsecStatus.Success)
+    } else {
+        return (item, ParsecStatus.Failed("Except Eof but \(item)"))
     }
 }
 
-typealias Char = One<String.UnicodeScalarView>
-
-struct Text: Parsec {
-    typealias ItemType = String.UnicodeScalarView
-    typealias S = String.UnicodeScalarView
-    var value:ItemType
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
-        for idx in value.startIndex...value.endIndex {
+func text(value:String)->Parsec<String, String.UnicodeScalarView>.Parser {
+    return {(state: BasicState<String.UnicodeScalarView>)->(String?, ParsecStatus) in
+        var scalars = value.unicodeScalars
+        for idx in scalars.startIndex...scalars.endIndex {
             var re = state.next()
             if re == nil {
                 return (nil, ParsecStatus.Failed("Except Text \(value) but Eof"))
             } else {
                 var rune = re!
-                if rune != value[idx] {
-                    return (nil, ParsecStatus.Failed("Text[\(idx)]:\(value[idx]) not match Data[\(state.pos)]:\(rune)"))
+                if rune != scalars[idx] {
+                    return (nil, ParsecStatus.Failed("Text[\(idx)]:\(scalars[idx]) not match Data[\(state.pos)]:\(rune)"))
                 }
             }
         }
@@ -115,20 +72,18 @@ struct Text: Parsec {
     }
 }
 
-struct Return<E, S:CollectionType>:Parsec{
-    typealias ItemType = E
-    let value:ItemType?
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+func pack<ItemType, S:CollectionType>(value:ItemType?)->Parsec<ItemType, S>.Parser {
+    return {(state:BasicState)->(ItemType?, ParsecStatus) in
         return (value, ParsecStatus.Success)
     }
 }
 
-struct Fail<E, S:CollectionType>:Parsec {
-    typealias ItemType = E
-    let message:String
-    func walk(state: BasicState<S>) -> (ItemType?, ParsecStatus) {
+func fail<ItemType, S:CollectionType>(message:String)->Parsec<ItemType, S>.Parser {
+    return {(state:BasicState)->(ItemType?, ParsecStatus) in
         return (nil, ParsecStatus.Failed(message))
     }
 }
+
+
 
 

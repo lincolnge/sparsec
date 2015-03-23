@@ -8,16 +8,7 @@
 
 import Foundation
 
-enum PredResult<T>{
-    case Success(T)
-    case Failed
-    case Eof
-}
 
-enum ParsecStatus{
-    case Success
-    case Failed(String)
-}
 
 struct Props1<T> {
     typealias Pred = (T)->Bool
@@ -27,13 +18,24 @@ struct Props2<P, Q> {
     typealias Binder = (P)->Q
 }
 
+func unbox<T>(box:[T?], trust:Bool=false)->[T] {
+    var re:[T] = []
+    if trust {
+        for e in box {
+            re.append(e!)
+        }
+    } else {
+        for e in box {
+            if e != nil {
+                re.append(e!)
+            }
+        }
+    }
+    return re
+}
+
 extension String: CollectionType {}
 
 extension String.UnicodeScalarView:CollectionType{}
 
-protocol Parsec {
-    typealias S:CollectionType
-    typealias ItemType
-    func walk (state: BasicState<S>) -> (ItemType?, ParsecStatus)
-}
 
