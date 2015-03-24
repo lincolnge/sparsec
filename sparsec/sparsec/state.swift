@@ -9,7 +9,7 @@
 import Foundation
 
 class BasicState<S:CollectionType> {
-    typealias ItemType = S.Generator.Element
+    typealias T = S.Generator.Element
     var container: S
     var _pos : S.Index
     init(_ container: S) {
@@ -24,7 +24,7 @@ class BasicState<S:CollectionType> {
         }
     }
 
-    func next() -> ItemType? {
+    func next() -> T? {
         if self.pos == self.container.endIndex.successor() {
             return nil
         }
@@ -33,9 +33,9 @@ class BasicState<S:CollectionType> {
         return item
     }
 
-    func next(pred : Props1<ItemType>.Pred) -> PredResult<ItemType> {
+    func next(pred : Equal<T>.Pred) -> PredResult<T> {
         if self.pos == self.container.endIndex.successor() {
-            return PredResult<ItemType>.Eof
+            return PredResult<T>.Eof
         }
         var item = container[self.pos]
         self.pos = self.pos.successor()
@@ -46,7 +46,7 @@ class BasicState<S:CollectionType> {
         }
         return PredResult.Failed
     }
-    subscript(idx: S.Index) -> ItemType? {
+    subscript(idx: S.Index) -> T? {
         get {
             return container[idx]
         }
@@ -55,8 +55,8 @@ class BasicState<S:CollectionType> {
 
 class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
         BasicState<S> {
-    typealias ItemType = S.Generator.Element
-    var newline:Props1<ItemType>.Pred
+    typealias T = S.Generator.Element
+    var newline:Equal<T>.Pred
     var lines:[S.Index] = []
     var row, col : S.Index
     var line: S.Index {
@@ -69,7 +69,7 @@ class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
             return col
         }
     }
-    init(_ container: S, newline: Props1<ItemType>.Pred){
+    init(_ container: S, newline: Equal<T>.Pred){
         self.newline = newline
         self.row = container.startIndex
         self.col = container.startIndex

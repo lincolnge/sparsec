@@ -14,11 +14,14 @@ let spaces = NSCharacterSet.whitespaceCharacterSet()
 let spacesAndNewlines = NSCharacterSet.whitespaceAndNewlineCharacterSet()
 let newlines = NSCharacterSet.newlineCharacterSet()
 
-func charSet(title:String, charSet:NSCharacterSet)->Parsec<UnicodeScalar, String.UnicodeScalarView>.Parser {
+typealias UChr = UnicodeScalar
+typealias UStr = String.UnicodeScalarView
+
+func charSet(title:String, charSet:NSCharacterSet)->Parsec<UChr, UStr>.Parser {
     let pred = {(c:UnicodeScalar)-> Bool in
         return charSet.longCharacterIsMember(c.value)
     }
-    return {(state:BasicState<String.UnicodeScalarView>)->(UnicodeScalar?, ParsecStatus) in
+    return {(state:BasicState<UStr>)->(UChr?, ParsecStatus) in
         var pre = state.next(pred)
         switch pre {
         case let .Success(value):
@@ -37,21 +40,16 @@ let space = charSet("space", spaces)
 let sol = charSet("space or newline", spacesAndNewlines)
 let newline = charSet("newline", newlines)
 
-func char(c:UnicodeScalar)->Parsec<UnicodeScalar, String.UnicodeScalarView>.Parser {
+func char(c:UChr)->Parsec<UChr, UStr>.Parser {
     return one(c)
 }
 
-let uint = bind(many1(digit), {(x:[UnicodeScalar?]?)->Parsec<String.UnicodeScalarView, String.UnicodeScalarView>.Parser in
-        var re = "".unicodeScalars
-        var values = unbox(x!)
-        for c in  values {
-            re.append(c)
-        }
-        return pack(re)
-})
+let uint = many1(digit) >>= {(x:[UChr?]?)->Parsec<UStr, UStr>.Parser in
+    return pack(cs2us(x!))
+}
 
-let int = option(try(char("-")), nil) >>= {(x:UnicodeScalar?)->Parsec<String.UnicodeScalarView, String.UnicodeScalarView>.Parser in
-    return {(state:BasicState<String.UnicodeScalarView>)->(String.UnicodeScalarView?, ParsecStatus) in
+let int = option(try(char("-")), nil) >>= {(x:UChr?)->Parsec<UStr, UStr>.Parser in
+    return {(state:BasicState<UStr>)->(UStr?, ParsecStatus) in
         var (re, status) = uint(state)
         switch status {
         case .Success:
@@ -67,3 +65,20 @@ let int = option(try(char("-")), nil) >>= {(x:UnicodeScalar?)->Parsec<String.Uni
     }
 }
 
+func cs2us(cs:[UChr?]) -> UStr {
+    var re = "".unicodeScalars
+    var values = unbox(cs)
+    for c in  values {
+        re.append(c)
+    }
+    return re
+}
+
+func cs2str(cs:[UChr?]) -> String {
+    var re = "".unicodeScalars
+    var values = unbox(cs)
+    for c in  values {
+        re.append(c)
+    }
+    return String(re)
+}

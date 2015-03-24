@@ -8,8 +8,8 @@
 
 import Foundation
 
-func try<ItemType, S:CollectionType>(parsec: Parsec<ItemType, S>.Parser) -> Parsec<ItemType, S>.Parser {
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func try<T, S:CollectionType>(parsec: Parsec<T, S>.Parser) -> Parsec<T, S>.Parser {
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
         var p = state.pos
         var (re, status) = parsec(state)
         switch status {
@@ -22,9 +22,9 @@ func try<ItemType, S:CollectionType>(parsec: Parsec<ItemType, S>.Parser) -> Pars
     }
 }
 
-func either<ItemType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, y: Parsec<ItemType, S>.Parser)
-    -> Parsec<ItemType, S>.Parser {
-        return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func either<T, S:CollectionType>(x: Parsec<T, S>.Parser, y: Parsec<T, S>.Parser)
+    -> Parsec<T, S>.Parser {
+        return {(state: BasicState<S>) -> (T?, ParsecStatus) in
             var p = state.pos
             var (re, status) = x(state)
             switch status {
@@ -42,13 +42,13 @@ func either<ItemType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, y: Parsec
 }
 
 infix operator <|> { associativity left }
-func <|><ItemType, S:CollectionType >(left: Parsec<ItemType, S>.Parser,
-        right: Parsec<ItemType, S>.Parser)  -> Parsec<ItemType, S>.Parser {
+func <|><T, S:CollectionType >(left: Parsec<T, S>.Parser,
+        right: Parsec<T, S>.Parser)  -> Parsec<T, S>.Parser {
     return either(left, right)
 }
 
-func otherwise<ItemType, S:CollectionType >(x:Parsec<ItemType, S>.Parser, message:String)->Parsec<ItemType, S>.Parser {
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func otherwise<T, S:CollectionType >(x:Parsec<T, S>.Parser, message:String)->Parsec<T, S>.Parser {
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
         var (re, status) = x(state)
         switch status {
         case .Success:
@@ -60,19 +60,19 @@ func otherwise<ItemType, S:CollectionType >(x:Parsec<ItemType, S>.Parser, messag
 }
 
 infix operator <?> { associativity left }
-func <?><ItemType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, message: String)  -> Parsec<ItemType, S>.Parser {
+func <?><T, S:CollectionType>(x: Parsec<T, S>.Parser, message: String)  -> Parsec<T, S>.Parser {
     return otherwise(x, message)
 }
 
-func option<ItemType, S:CollectionType>(parsec:Parsec<ItemType, S>.Parser, value:ItemType?) -> Parsec<ItemType, S>.Parser {
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func option<T, S:CollectionType>(parsec:Parsec<T, S>.Parser, value:T?) -> Parsec<T, S>.Parser {
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
         return either(parsec, pack(value))(state)
     }
 }
 
-func oneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
-    where S.Generator.Element==ItemType, C.Generator.Element==ItemType>(elements:C)->Parsec<ItemType, S>.Parser {
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func oneOf<T:Equatable, C:CollectionType, S:CollectionType
+    where S.Generator.Element==T, C.Generator.Element==T>(elements:C)->Parsec<T, S>.Parser {
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
         var re = state.next()
         if re == nil {
             return (nil, ParsecStatus.Failed("Except one of [\(elements)] but Eof"))
@@ -87,9 +87,9 @@ func oneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
     }
 }
 
-func noneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
-        where C.Generator.Element==ItemType, S.Generator.Element==ItemType>(elements:C)->Parsec<ItemType, S>.Parser {
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
+func noneOf<T:Equatable, C:CollectionType, S:CollectionType
+        where C.Generator.Element==T, S.Generator.Element==T>(elements:C)->Parsec<T, S>.Parser {
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
         var re = state.next()
         if re == nil {
             return (nil, ParsecStatus.Failed("Try to check none of [\(elements)] but Eof"))
@@ -105,9 +105,9 @@ func noneOf<ItemType:Equatable, C:CollectionType, S:CollectionType
     }
 }
 
-func bind<ItemType, ReType, S:CollectionType >(x:Parsec<ItemType, S>.Parser,
-        binder:(ItemType?)->Parsec<ReType, S>.Parser) -> Parsec<ReType, S>.Parser{
-    return {(state: BasicState<S>) -> (ReType?, ParsecStatus) in
+func bind<T, R, S:CollectionType >(x:CPS<T, R, S>.Parser,
+        binder:CPS<T, R, S>.Continuation) -> CPS<T, R, S>.Passing {
+    return {(state: BasicState<S>) -> (R?, ParsecStatus) in
         var (re, status) = x(state)
         switch status {
         case .Success:
@@ -118,15 +118,14 @@ func bind<ItemType, ReType, S:CollectionType >(x:Parsec<ItemType, S>.Parser,
         }
     }
 }
-
 infix operator >>= { associativity left }
-func >>=<ItemType, ReType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, binder:(ItemType?)->Parsec<ReType, S>.Parser)  -> Parsec<ReType, S>.Parser {
+func >>=<T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, binder:CPS<T, R, S>.Continuation) -> CPS<T, R, S>.Passing {
     return bind(x, binder)
 }
 
-func bind_<ItemType, ReType, S:CollectionType >(x: Parsec<ItemType, S>.Parser,
-        y:Parsec<ReType, S>.Parser)->Parsec<ReType, S>.Parser{
-    return {(state: BasicState<S>) -> (ReType?, ParsecStatus) in
+func bind_<T, R, S:CollectionType >(x: CPS<T, R, S>.Parser,
+        y:CPS<T, R, S>.Passing) -> CPS<T, R, S>.Passing {
+    return {(state: BasicState<S>) -> (R?, ParsecStatus) in
         var (re, status) = x(state)
         switch status {
         case .Success:
@@ -137,33 +136,34 @@ func bind_<ItemType, ReType, S:CollectionType >(x: Parsec<ItemType, S>.Parser,
     }
 }
 infix operator >> { associativity left }
-func >><ItemType, ReType, S:CollectionType>(x: Parsec<ItemType, S>.Parser, y:Parsec<ReType, S>.Parser)  -> Parsec<ReType, S>.Parser {
+func >><T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, y:CPS<T, R, S>.Passing)  -> CPS<T, R, S>.Passing {
     return x >> y
 }
 
-func between<ItemType, S:CollectionType>(b:Parsec<ItemType, S>.Parser,
-        e:Parsec<ItemType, S>.Parser,
-        p:Parsec<ItemType, S>.Parser)->Parsec<ItemType, S>.Parser{
-    return {(state: BasicState<S>) -> (ItemType?, ParsecStatus) in
-        var keep = {(data:ItemType?)->Parsec<ItemType, S>.Parser in
-            return bind_(e, pack(data))
+func between<T, S:CollectionType>(b:Parsec<T, S>.Parser, e:Parsec<T, S>.Parser,
+        p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
+    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
+        var keep = {(data:T?)->Parsec<T, S>.Parser in
+            return (e >> pack(data))
         }
         return (b >> (p>>=keep))(state)
     }
 }
 
-func many<ItemType, S:CollectionType >(p:Parsec<ItemType, S>.Parser) -> Parsec<[ItemType?], S>.Parser {
-    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+func many<T, S:CollectionType >(p:Parsec<T, S>.Parser) -> Parsec<[T?], S>.Parser {
+    return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
         return option(many1(p), [])(state)
     }
 }
 
-func many1<ItemType, S>(p: Parsec<ItemType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
-    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
-        var head = {(value:ItemType?) -> Parsec<[ItemType?], S>.Parser in
-            var tail = {(data:[ItemType?]?)->Parsec<[ItemType?], S>.Parser in
-                var buf = data
-                buf!.append(value)
+func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser {
+    return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
+        var head = {(value:T?) -> Parsec<[T?], S>.Parser in
+            var tail = {(data:[T?]?)->Parsec<[T?], S>.Parser in
+                var buf = [value]
+                for d in data! {
+                    buf.append(d)
+                }
                 return pack(buf)
             }
             return many(p) >>= tail
@@ -172,18 +172,42 @@ func many1<ItemType, S>(p: Parsec<ItemType, S>.Parser)->Parsec<[ItemType?], S>.P
     }
 }
 
-func sepBy<ItemType, SepType, S:CollectionType>(p: Parsec<ItemType, S>.Parser,
-        sep:Parsec<SepType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
-    return  {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
+func manyTil<T, TilType, S:CollectionType>(p:Parsec<T, S>.Parser,
+        end:Parsec<TilType, S>.Parser)->Parsec<[T?], S>.Parser{
+    var head = {(value:T?)->Parsec<[T?], S>.Parser in
+        var tail = {(data:[T?]?)->Parsec<[T?], S>.Parser in
+            var buf = [value]
+            for d in data! {
+                buf.append(d)
+            }
+            return pack(buf)
+        }
+        return manyTil(p, end) >>= tail
+    }
+    var term = try(end) >> pack([T?]())
+    return term <|> (p >>= head)
+}
+
+func maybe<T, S>(p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
+    return option((p>>pack(nil)), nil)
+}
+
+func skip<T, S>(p:Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser{
+    return maybe(many(p))
+}
+
+func sepBy<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
+        sep:Parsec<SepType, S>.Parser)->Parsec<[T?], S>.Parser {
+    return  {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
         return option(sepBy1(p, sep), [])(state)
     }
 }
 
-func sepBy1<ItemType, SepType, S:CollectionType>(p: Parsec<ItemType, S>.Parser,
-        sep:Parsec<SepType, S>.Parser)->Parsec<[ItemType?], S>.Parser {
-    return {(state: BasicState<S>) -> ([ItemType?]?, ParsecStatus) in
-        var head = {(value: ItemType?)->Parsec<[ItemType?], S>.Parser in
-            var tail = {(data:[ItemType?]?)->Parsec<[ItemType?], S>.Parser in
+func sepBy1<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
+        sep:Parsec<SepType, S>.Parser)->Parsec<[T?], S>.Parser {
+    return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
+        var head = {(value: T?)->Parsec<[T?], S>.Parser in
+            var tail = {(data:[T?]?)->Parsec<[T?], S>.Parser in
                 var buf = data!
                 buf.append(value)
                 return pack(buf)

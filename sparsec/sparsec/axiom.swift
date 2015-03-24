@@ -19,6 +19,6 @@ enum ParsecStatus{
     case Failed(String)
 }
 
-struct Parsec<ItemType, S:CollectionType> {
-    typealias Parser = (BasicState<S>)->(ItemType?, ParsecStatus)
+struct Parsec<T, S:CollectionType> {
+    typealias Parser = (BasicState<S>)->(T?, ParsecStatus)
 }

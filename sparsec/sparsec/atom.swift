@@ -8,15 +8,15 @@
 
 import Foundation
 
-func equals<T:Equatable>(a:T)->Props1<T>.Pred{
+func equals<T:Equatable>(a:T)->Equal<T>.Pred{
     return {(x:T)->Bool in
         return a==x
     }
 }
 
-func one<ItemType:Equatable, S:CollectionType where S.Generator.Element==ItemType>(one: ItemType)->Parsec<ItemType, S>.Parser{
+func one<T:Equatable, S:CollectionType where S.Generator.Element==T>(one: T)->Parsec<T, S>.Parser{
     var pred = equals(one)
-    return {(state: BasicState<S>)->(ItemType?, ParsecStatus) in
+    return {(state: BasicState<S>)->(T?, ParsecStatus) in
         var re = state.next(pred)
         switch re {
         case .Success:
@@ -29,10 +29,10 @@ func one<ItemType:Equatable, S:CollectionType where S.Generator.Element==ItemTyp
     }
 }
 
-func subject<ItemType:Equatable, S:CollectionType where S.Generator.Element==ItemType >
-        (one: ItemType, curry:(ItemType)->(ItemType)->Bool)->Parsec<ItemType, S>.Parser {
-    var pred:(ItemType)->Bool = curry(one)
-    return {(state: BasicState<S>)->(ItemType?, ParsecStatus) in
+func subject<T:Equatable, S:CollectionType where S.Generator.Element==T >
+        (one: T, curry:(T)->(T)->Bool)->Parsec<T, S>.Parser {
+    var pred:(T)->Bool = curry(one)
+    return {(state: BasicState<S>)->(T?, ParsecStatus) in
         var re = state.next(pred)
         switch re {
         case .Success:
@@ -45,7 +45,7 @@ func subject<ItemType:Equatable, S:CollectionType where S.Generator.Element==Ite
     }
 }
 
-func eof<ItemType, S:CollectionType where S.Generator.Element==ItemType>(state: BasicState<S>)->(ItemType?, ParsecStatus){
+func eof<T, S:CollectionType where S.Generator.Element==T>(state: BasicState<S>)->(T?, ParsecStatus){
     var item = state.next()
     if item == nil {
         return (nil, ParsecStatus.Success)
@@ -72,14 +72,14 @@ func text(value:String)->Parsec<String, String.UnicodeScalarView>.Parser {
     }
 }
 
-func pack<ItemType, S:CollectionType>(value:ItemType?)->Parsec<ItemType, S>.Parser {
-    return {(state:BasicState)->(ItemType?, ParsecStatus) in
+func pack<T, S:CollectionType>(value:T?)->Parsec<T, S>.Parser {
+    return {(state:BasicState)->(T?, ParsecStatus) in
         return (value, ParsecStatus.Success)
     }
 }
 
-func fail<ItemType, S:CollectionType>(message:String)->Parsec<ItemType, S>.Parser {
-    return {(state:BasicState)->(ItemType?, ParsecStatus) in
+func fail<T, S:CollectionType>(message:String)->Parsec<T, S>.Parser {
+    return {(state:BasicState)->(T?, ParsecStatus) in
         return (nil, ParsecStatus.Failed(message))
     }
 }

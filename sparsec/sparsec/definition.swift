@@ -8,19 +8,27 @@
 
 import Foundation
 
-
-
-struct Props1<T> {
+struct Equal<T> {
     typealias Pred = (T)->Bool
+    typealias Curry = (T)->(T)->Bool
 }
 
-struct Props2<P, Q> {
-    typealias Binder = (P)->Q
+struct CPS<P, Q, S:CollectionType> {
+    typealias Parser = Parsec<P, S>.Parser
+    typealias ParserMP = Parsec<P, S>.Parser
+    typealias Passing = Parsec<Q, S>.Parser
+    typealias PassingMP = Parsec<[Q?], S>.Parser
+    typealias Continuation = (P?)->Parsec<Q, S>.Parser
+    typealias ContinuationMP = ([P?]?)->Parsec<Q, S>.Parser
+    typealias Bind = (Parser, Continuation)->Passing
+    typealias Bind_ = (Parser, Passing)->Passing
+    typealias BindMP = (ParserMP, ContinuationMP)->PassingMP
+    typealias BindMP_ = (ParserMP, PassingMP)->PassingMP
 }
 
-func unbox<T>(box:[T?], trust:Bool=false)->[T] {
+func unbox<T>(box:[T?], force:Bool=false)->[T] {
     var re:[T] = []
-    if trust {
+    if force {
         for e in box {
             re.append(e!)
         }
