@@ -65,6 +65,24 @@ let int = option(try(char("-")), nil) >>= {(x:UChr?)->Parsec<UStr, UStr>.Parser 
     }
 }
 
+func text(value:String)->Parsec<String, String.UnicodeScalarView>.Parser {
+    return {(state: BasicState<String.UnicodeScalarView>)->(String?, ParsecStatus) in
+        var scalars = value.unicodeScalars
+        for idx in scalars.startIndex...scalars.endIndex {
+            var re = state.next()
+            if re == nil {
+                return (nil, ParsecStatus.Failed("Except Text \(value) but Eof"))
+            } else {
+                var rune = re!
+                if rune != scalars[idx] {
+                    return (nil, ParsecStatus.Failed("Text[\(idx)]:\(scalars[idx]) not match Data[\(state.pos)]:\(rune)"))
+                }
+            }
+        }
+        return (value, ParsecStatus.Success)
+    }
+}
+
 func cs2us(cs:[UChr?]) -> UStr {
     var re = "".unicodeScalars
     var values = unbox(cs)

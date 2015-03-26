@@ -8,12 +8,6 @@
 
 import Foundation
 
-func equals<T:Equatable>(a:T)->Equal<T>.Pred{
-    return {(x:T)->Bool in
-        return a==x
-    }
-}
-
 func one<T:Equatable, S:CollectionType where S.Generator.Element==T>(one: T)->Parsec<T, S>.Parser{
     var pred = equals(one)
     return {(state: BasicState<S>)->(T?, ParsecStatus) in
@@ -45,7 +39,7 @@ func subject<T:Equatable, S:CollectionType where S.Generator.Element==T >
     }
 }
 
-func eof<T, S:CollectionType where S.Generator.Element==T>(state: BasicState<S>)->(T?, ParsecStatus){
+func eof<S:CollectionType>(state: BasicState<S>)->(S.Generator.Element?, ParsecStatus){
     var item = state.next()
     if item == nil {
         return (nil, ParsecStatus.Success)
@@ -54,23 +48,7 @@ func eof<T, S:CollectionType where S.Generator.Element==T>(state: BasicState<S>)
     }
 }
 
-func text(value:String)->Parsec<String, String.UnicodeScalarView>.Parser {
-    return {(state: BasicState<String.UnicodeScalarView>)->(String?, ParsecStatus) in
-        var scalars = value.unicodeScalars
-        for idx in scalars.startIndex...scalars.endIndex {
-            var re = state.next()
-            if re == nil {
-                return (nil, ParsecStatus.Failed("Except Text \(value) but Eof"))
-            } else {
-                var rune = re!
-                if rune != scalars[idx] {
-                    return (nil, ParsecStatus.Failed("Text[\(idx)]:\(scalars[idx]) not match Data[\(state.pos)]:\(rune)"))
-                }
-            }
-        }
-        return (value, ParsecStatus.Success)
-    }
-}
+
 
 func pack<T, S:CollectionType>(value:T?)->Parsec<T, S>.Parser {
     return {(state:BasicState)->(T?, ParsecStatus) in
@@ -78,12 +56,11 @@ func pack<T, S:CollectionType>(value:T?)->Parsec<T, S>.Parser {
     }
 }
 
-func fail<T, S:CollectionType>(message:String)->Parsec<T, S>.Parser {
-    return {(state:BasicState)->(T?, ParsecStatus) in
+func fail<S:CollectionType>(message:String)->Parsec<S.Generator.Element, S>.Parser {
+    return {(state:BasicState)->(S.Generator.Element?, ParsecStatus) in
         return (nil, ParsecStatus.Failed(message))
     }
 }
-
 
 
 

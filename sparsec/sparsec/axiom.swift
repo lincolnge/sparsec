@@ -22,3 +22,4 @@ enum ParsecStatus{
 struct Parsec<T, S:CollectionType> {
     typealias Parser = (BasicState<S>)->(T?, ParsecStatus)
 }
+

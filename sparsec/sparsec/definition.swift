@@ -13,6 +13,12 @@ struct Equal<T> {
     typealias Curry = (T)->(T)->Bool
 }
 
+func equals<T:Equatable>(a:T)->Equal<T>.Pred{
+    return {(x:T)->Bool in
+        return a==x
+    }
+}
+
 struct CPS<P, Q, S:CollectionType> {
     typealias Parser = Parsec<P, S>.Parser
     typealias ParserMP = Parsec<P, S>.Parser
