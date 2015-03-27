@@ -212,3 +212,18 @@ func sepBy1<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
     }
     return (p >>= helper)
 }
+
+infix operator <- { associativity left }
+func <- <T, S:CollectionType>(inout x: T?, p: Parsec<T, S>.Parser) -> Parsec<T, S>.Parser {
+    return {(state:BasicState<S>)->(T?, ParsecStatus) in
+        var (re, status) = p(state)
+        switch status{
+        case .Success:
+            x=re
+        case .Failed:
+            x=nil
+        }
+        return (re, status)
+    }
+}
+
