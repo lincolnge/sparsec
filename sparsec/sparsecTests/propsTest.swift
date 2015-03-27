@@ -1,15 +1,15 @@
 //
-//  atomTest.swift
+//  propsTest.swift
 //  sparsec
 //
-//  Created by Mars Liu on 15/3/10.
+//  Created by Mars Liu on 15/3/27.
 //  Copyright (c) 2015年 Dwarf Artisan. All rights reserved.
 //
 
 import Cocoa
 import XCTest
 
-class atomTests: XCTestCase {
+class propsTest: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -21,37 +21,30 @@ class atomTests: XCTestCase {
         super.tearDown()
     }
 
-    func testChar() {
+    func testFloat() {
         // This is an example of a functional test case.
-        let data = "This is a String."
+        let data = ".15926"
         let state = BasicState(data.unicodeScalars)
-        let c:UnicodeScalar = "T"
-        let t = char(c)
-        var (re, status) = t(state)
-        switch status {
-        case .Success:
-            XCTAssert(true, "pass")
-        case let .Failed(msg):
-            XCTAssert(false, "excpet t parsec got 't' but got error: \(msg)")
+        let float = many(try(digit)) >>= {(n:[UChr?]?)->Parsec<String, UStr>.Parser in
+            return {(state:BasicState<UStr>)->(String?, ParsecStatus) in
+                var (re, status) = (char(".") >> many1(try(digit)))(state)
+                switch status {
+                case .Success:
+                    return ("\(cs2str(n!)).\(cs2str(re!))", ParsecStatus.Success)
+                case .Failed:
+                    return (nil, status)
+                }
+            }
         }
-    }
-    
-    func testDigit() {
-        // This is an example of a functional test case.
-        let data = "07500"
-        let state = BasicState(data.unicodeScalars)
-        let num = digit
-        var (re, status) = num(state)
+        var (re, status) = float(state)
         switch status {
         case let .Failed(msg):
             XCTAssert(false, "excpet digit parsec got a digit but error: \(msg)")
         case .Success:
-            XCTAssert(true, "pass")
+            println("float test success and got:\(re)")
         }
     }
 
-
-    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measureBlock() {

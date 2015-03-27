@@ -11,3 +11,13 @@ for idx in range {
 for idx in 0...10 {
     println(idx)
 }
+
+var ustr = "abcdef".unicodeScalars
+ustr.startIndex.successor()
+ustr.endIndex
+
+
+
+
+
+

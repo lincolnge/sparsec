@@ -65,9 +65,7 @@ func <?><T, S:CollectionType>(x: Parsec<T, S>.Parser, message: String)  -> Parse
 }
 
 func option<T, S:CollectionType>(parsec:Parsec<T, S>.Parser, value:T?) -> Parsec<T, S>.Parser {
-    return {(state: BasicState<S>) -> (T?, ParsecStatus) in
-        return either(parsec, pack(value))(state)
-    }
+        return parsec <|> pack(value)
 }
 
 func oneOf<T:Equatable, C:CollectionType, S:CollectionType
@@ -119,7 +117,7 @@ func bind<T, R, S:CollectionType >(x:CPS<T, R, S>.Parser,
     }
 }
 infix operator >>= { associativity left }
-func >>=<T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, binder:CPS<T, R, S>.Continuation) -> CPS<T, R, S>.Passing {
+func >>= <T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, binder:CPS<T, R, S>.Continuation) -> CPS<T, R, S>.Passing {
     return bind(x, binder)
 }
 
@@ -136,7 +134,7 @@ func bind_<T, R, S:CollectionType >(x: CPS<T, R, S>.Parser,
     }
 }
 infix operator >> { associativity left }
-func >><T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, y:CPS<T, R, S>.Passing)  -> CPS<T, R, S>.Passing {
+func >> <T, R, S:CollectionType>(x: CPS<T, R, S>.Parser, y:CPS<T, R, S>.Passing)  -> CPS<T, R, S>.Passing {
     return bind_(x, y)
 }
 
@@ -152,23 +150,27 @@ func between<T, S:CollectionType>(b:Parsec<T, S>.Parser, e:Parsec<T, S>.Parser,
 
 func many<T, S:CollectionType >(p:Parsec<T, S>.Parser) -> Parsec<[T?], S>.Parser {
     return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
-        return option(many1(p), [])(state)
+        return (many1(p) <|> pack([]))(state)
     }
 }
 
 func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser {
-    return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
-        var head = {(value:T?) -> Parsec<[T?], S>.Parser in
-            var tail = {(data:[T?]?)->Parsec<[T?], S>.Parser in
-                var buf = [value]
-                for d in data! {
-                    buf.append(d)
+    var helper = {(start:T?)->Parsec<[T?], S>.Parser in
+        return {(state:BasicState<S>)->([T?]?, ParsecStatus) in
+            var res:[T?] = [start]
+            while true {
+                var (re, status) = p(state)
+                switch status {
+                case .Success:
+                    res.append(re)
+                case .Failed:
+                    return (res, ParsecStatus.Success)
                 }
-                return pack(buf)
             }
-            return many(p) >>= tail
         }
-        return (p >>= head)(state)
+    }
+    return p >>= {(value:T?)->Parsec<[T?], S>.Parser in
+        return helper(value)
     }
 }
 

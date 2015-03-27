@@ -11,17 +11,10 @@ import Foundation
 class BasicState<S:CollectionType> {
     typealias T = S.Generator.Element
     var container: S
-    var _pos : S.Index
+    var pos : S.Index
     init(_ container: S) {
         self.container = container
-        _pos = container.startIndex
-    }
-    var pos : S.Index { get {
-            return _pos
-        }
-        set(index){
-            _pos = index
-        }
+        self.pos = container.startIndex
     }
 
     func next() -> T? {
@@ -69,6 +62,7 @@ class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
             return col
         }
     }
+    var _pos: S.Index
     init(_ container: S, newline: Equal<T>.Pred){
         self.newline = newline
         self.row = container.startIndex
@@ -79,7 +73,9 @@ class LinesState<S:CollectionType where S.Index: IntegerArithmeticType>:
                 self.lines.append(index)
             }
         }
+        _pos = container.startIndex
         super.init(container)
+        
     }
     override var pos:S.Index {
         get {
