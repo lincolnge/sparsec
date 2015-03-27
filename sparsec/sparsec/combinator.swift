@@ -150,7 +150,7 @@ func between<T, S:CollectionType>(b:Parsec<T, S>.Parser, e:Parsec<T, S>.Parser,
 
 func many<T, S:CollectionType >(p:Parsec<T, S>.Parser) -> Parsec<[T?], S>.Parser {
     return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
-        return (try(many1(p)) <|> pack([]))(state)
+        return (many1(try(p)) <|> pack([]))(state)
     }
 }
 
@@ -159,7 +159,7 @@ func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser 
         return {(state:BasicState<S>)->([T?]?, ParsecStatus) in
             var res:[T?] = [start]
             while true {
-                var (re, status) = p(state)
+                var (re, status) = try(p)(state)
                 switch status {
                 case .Success:
                     res.append(re)
@@ -169,29 +169,19 @@ func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser 
             }
         }
     }
-    return p >>= {(value:T?)->Parsec<[T?], S>.Parser in
-        return helper(value)
-    }
+    return p >>= helper
 }
 
 func manyTil<T, TilType, S:CollectionType>(p:Parsec<T, S>.Parser,
         end:Parsec<TilType, S>.Parser)->Parsec<[T?], S>.Parser{
-    var head = {(value:T?)->Parsec<[T?], S>.Parser in
-        var tail = {(data:[T?]?)->Parsec<[T?], S>.Parser in
-            var buf = [value]
-            for d in data! {
-                buf.append(d)
-            }
-            return pack(buf)
-        }
-        return manyTil(p, end) >>= tail
-    }
     var term = try(end) >> pack([T?]())
-    return term <|> (p >>= head)
+    return term <|> (many1(p) >>= {(re:[T?]?)->Parsec<[T?], S>.Parser in
+        return term >> pack(re)
+    })
 }
 
 func maybe<T, S>(p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
-    return option((p>>pack(nil)), nil)
+    return (p>>pack(nil)) <|> pack(nil)
 }
 
 func skip<T, S>(p:Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser{
@@ -200,27 +190,25 @@ func skip<T, S>(p:Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser{
 
 func sepBy<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
         sep:Parsec<SepType, S>.Parser)->Parsec<[T?], S>.Parser {
-    return sepBy1(p, sep) <|> pack([])
+    return sepBy1(try(p), try(sep)) <|> pack([])
 }
 
 func sepBy1<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
         sep:Parsec<SepType, S>.Parser)->Parsec<[T?], S>.Parser {
-    return {(state: BasicState<S>) -> ([T?]?, ParsecStatus) in
-        var helper = {(start:T?)->Parsec<[T?], S>.Parser in
-            return {(state:BasicState<S>)->([T?]?, ParsecStatus) in
-                var res:[T?] = [start]
-                var parser = sep>>p
-                while true {
-                    var (re, status) = parser(state)
-                    switch status {
-                    case .Success:
-                        res.append(re)
-                    case .Failed:
-                        return (res, ParsecStatus.Success)
-                    }
+    var helper = {(start:T?)->Parsec<[T?], S>.Parser in
+        return {(state:BasicState<S>)->([T?]?, ParsecStatus) in
+            var res:[T?] = [start]
+            var parser = try(sep)>>try(p)
+            while true {
+                var (re, status) = parser(state)
+                switch status {
+                case .Success:
+                    res.append(re)
+                case .Failed:
+                    return (res, ParsecStatus.Success)
                 }
             }
         }
-        return (p >>= helper)(state)
     }
+    return (p >>= helper)
 }

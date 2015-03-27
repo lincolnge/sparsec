@@ -23,11 +23,11 @@ class propsTest: XCTestCase {
 
     func testFloat() {
         // This is an example of a functional test case.
-        let data = ".15926"
+        let data = "3.15926"
         let state = BasicState(data.unicodeScalars)
-        let float = many(try(digit)) >>= {(n:[UChr?]?)->Parsec<String, UStr>.Parser in
+        let float = many(digit) >>= {(n:[UChr?]?)->Parsec<String, UStr>.Parser in
             return {(state:BasicState<UStr>)->(String?, ParsecStatus) in
-                var (re, status) = (char(".") >> many1(try(digit)))(state)
+                var (re, status) = (char(".") >> many1(digit))(state)
                 switch status {
                 case .Success:
                     return ("\(cs2str(n!)).\(cs2str(re!))", ParsecStatus.Success)
