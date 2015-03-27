@@ -31,7 +31,7 @@ class propsTest: XCTestCase {
         case let .Failed(msg):
             XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
         case .Success:
-            XCTAssert(true, "float test success and got:\(re)")
+            XCTAssert(re == data, "float test success and got:\(re)")
         }
     }
     
@@ -45,7 +45,7 @@ class propsTest: XCTestCase {
         case let .Failed(msg):
             XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
         case .Success:
-            XCTAssert(true, "float test success and got:\(re)")
+            XCTAssert(re == data, "float test success and got:\(re)")
         }
     }
     
@@ -59,7 +59,7 @@ class propsTest: XCTestCase {
         case let .Failed(msg):
             XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
         case .Success:
-            XCTAssert(true, "float test success and got:\(re)")
+            XCTAssert(re == "3.15926", "float test success and got:\(re)")
         }
     }
     
@@ -101,7 +101,7 @@ class propsTest: XCTestCase {
         case let .Failed(msg):
             XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
         case .Success:
-            XCTAssert(true, "float test success and got:\(re)")
+            XCTAssert(re == data, "float test success and got:\(re)")
         }
     }
     
@@ -111,15 +111,31 @@ class propsTest: XCTestCase {
         let state = BasicState(data.unicodeScalars)
         let num = float
         var (re, status) = num(state)
+        println("re, status : \((re, status))")
         switch status {
         case let .Failed(msg):
             XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
         case .Success:
-            XCTAssert(true, "float test success and got:\(re)")
+            XCTAssert(re == data, "float test success and got:\(re)")
         }
     }
     
     func testFloat3() {
+        // This is an example of a functional test case.
+        let data = "-624.3dsfgasd"
+        let state = BasicState(data.unicodeScalars)
+        let num = float
+        var (re, status) = num(state)
+        println("re, status : \((re, status))")
+        switch status {
+        case let .Failed(msg):
+            XCTAssert(false, "excpet float parsec got a float but error: \(msg)")
+        case .Success:
+            XCTAssert(re == "-624.3", "float test success and got:\(re)")
+        }
+    }
+    
+    func testFloat4() {
         // This is an example of a functional test case.
         let data = "-6243"
         let state = BasicState(data.unicodeScalars)
@@ -133,7 +149,7 @@ class propsTest: XCTestCase {
         }
     }
     
-    func testFloat4() {
+    func testFloat5() {
         // This is an example of a functional test case.
         let data = "315926"
         let state = BasicState(data.unicodeScalars)
@@ -147,7 +163,7 @@ class propsTest: XCTestCase {
         }
     }
     
-    func testFloat5() {
+    func testFloat6() {
         // This is an example of a functional test case.
         let data = "beras3252.242"
         let state = BasicState(data.unicodeScalars)
