@@ -32,11 +32,21 @@ struct CPS<P, Q, S:CollectionType> {
     typealias BindMP_ = (ParserMP, PassingMP)->PassingMP
 }
 
-func fmap<P, Q, R>(functor:(P, Q)->R, x:P?, y:Q?)->R? {
-    if x==nil || y == nil {
+func fmap<P, R>(x:P?, functor:((P)->R)?)->R? {
+    if x==nil || functor == nil {
         return nil
     } else {
-        return functor(x!, y!)
+        return functor!(x!)
+    }
+}
+
+func fmap<P, Q, R>(x:P?, y:Q?, functor:((P, Q)->R)?)->R? {
+    if x==nil || y == nil || functor == nil {
+        return nil
+    } else {
+        return fmap(y, {(yj:Q)->R in
+            return functor!(x!, yj)
+        })
     }
 }
 

@@ -50,7 +50,29 @@ class atomTests: XCTestCase {
         }
     }
 
+    func testFMapFunction() {
+        let x:Int? = 12
+        let y:Int? = 23
+        var r:Int? = fmap(x, y, {(x, y)->Int in return x+y})
+        XCTAssert(r!==35, "Except a int? is 35 but got \(r)")
+    }
+    
+    func testFMapOperator() {
+        let x:Int? = 12
+        let y:Int? = 23
+        var r:Int? = fmap(x, y, +)
+        XCTAssert(r!==35, "Except a int? is 35 but got \(r)")
+    }
 
+    func testFMapCurry() {
+        let x:Int? = 12
+        let y:Int? = 23
+        let fun = {(right:Int)->(Int)->Int in
+             return {(left:Int)->Int in return left+right}
+        }
+        var r:Int? = fmap(x, fmap(y, fun))
+        XCTAssert(r!==35, "Except a int? is 35 but got \(r)")
+    }
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
