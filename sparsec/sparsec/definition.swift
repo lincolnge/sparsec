@@ -32,6 +32,14 @@ struct CPS<P, Q, S:CollectionType> {
     typealias BindMP_ = (ParserMP, PassingMP)->PassingMP
 }
 
+func fmap<P, Q, R>(functor:(P, Q)->R, x:P?, y:Q?)->R? {
+    if x==nil || y == nil {
+        return nil
+    } else {
+        return functor(x!, y!)
+    }
+}
+
 func unbox<T>(box:[T?], force:Bool=false)->[T] {
     var re:[T] = []
     if force {
