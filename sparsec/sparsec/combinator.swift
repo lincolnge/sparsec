@@ -181,7 +181,7 @@ func manyTil<T, TilType, S:CollectionType>(p:Parsec<T, S>.Parser,
 }
 
 func maybe<T, S>(p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
-    return (p>>pack(nil)) <|> pack(nil)
+    return try(p) <|> pack(nil)
 }
 
 func skip<T, S>(p:Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser{

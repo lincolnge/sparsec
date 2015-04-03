@@ -44,10 +44,9 @@ func eof<S:CollectionType>(state: BasicState<S>)->(S.Generator.Element?, ParsecS
     if item == nil {
         return (nil, ParsecStatus.Success)
     } else {
-        return (item, ParsecStatus.Failed("Except Eof but \(item)"))
+        return (item, ParsecStatus.Failed("Except Eof but \(item) at \(state.pos)"))
     }
 }
-
 
 
 func pack<T, S:CollectionType>(value:T?)->Parsec<T, S>.Parser {
