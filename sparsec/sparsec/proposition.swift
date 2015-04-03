@@ -40,6 +40,28 @@ let space = charSet("space", spaces)
 let sol = charSet("space or newline", spacesAndNewlines)
 let newline = charSet("newline", newlines)
 
+let unsignedFloat = many(digit) >>= {(n:[UChr?]?)->Parsec<String, UStr>.Parser in
+    return {(state:BasicState<UStr>)->(String?, ParsecStatus) in
+        var (re, status) = (char(".") >> many1(digit))(state)
+        switch status {
+        case .Success:
+            return ("\(cs2str(n!)).\(cs2str(re!))", ParsecStatus.Success)
+        case .Failed:
+            return (nil, status)
+        }
+    }
+}
+
+let float = try(unsignedFloat) <|> (char("-") >> {(state: BasicState<UStr>)->(String?, ParsecStatus) in
+    var (re, status) = unsignedFloat(state)
+    switch status {
+    case .Success:
+        return ("-\(re!)", ParsecStatus.Success)
+    case .Failed:
+        return (nil, status)
+    }
+})
+
 func char(c:UChr)->Parsec<UChr, UStr>.Parser {
     return one(c)
 }

@@ -123,8 +123,8 @@
 				3907CE4E1AAEF38A00CD70A3 /* atomTests.swift */,
 				3907CE581AAEF8A500CD70A3 /* elementsTests.swift */,
 				39DB5C511AA6D2860069AA30 /* sparsecTests.swift */,
-				39DB5C4F1AA6D2860069AA30 /* Supporting Files */,
 				394411A91AC50BDA0074D231 /* propsTest.swift */,
+				39DB5C4F1AA6D2860069AA30 /* Supporting Files */,
 			);
 			path = sparsecTests;
 			sourceTree = "<group>";
