@@ -31,7 +31,7 @@ class combTests: XCTestCase {
         case .Success:
             XCTAssert(true, "pass")
         case let .Failed(msg):
-            XCTAssert(false, "c is equal to data[0]")
+            XCTAssert(false, "c is equal to data[0] but got error: \(msg)")
         }
     }
     
@@ -46,7 +46,7 @@ class combTests: XCTestCase {
         case .Success:
             XCTAssert(true, "pass")
         case let .Failed(msg):
-            XCTAssert(false, "data[0] is equal to c or to d")
+            XCTAssert(false, "data[0] is equal to c or to d but got error: \(msg)")
         }
     }
     

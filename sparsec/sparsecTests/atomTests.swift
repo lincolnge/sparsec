@@ -83,7 +83,7 @@ class atomTests: XCTestCase {
         case .Success:
             XCTAssert(true, "pass")
         case let .Failed(msg):
-            XCTAssert(false)
+            XCTAssert(false, "excpet b parsec got 'b' but got error: \(msg)")
         }
     }
     
@@ -96,7 +96,7 @@ class atomTests: XCTestCase {
         case .Success:
             XCTAssert(true, "pass")
         case let .Failed(msg):
-            XCTAssert(false)
+            XCTAssert(false, "excpet space parsec got 'space' but got error: \(msg)")
         }
     }
     
