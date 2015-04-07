@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3907CE4F1AAEF38A00CD70A3 /* atomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE4E1AAEF38A00CD70A3 /* atomTests.swift */; };
 		3907CE551AAEF7AC00CD70A3 /* definition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* definition.swift */; };
 		3907CE561AAEF7AC00CD70A3 /* definition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE541AAEF7AC00CD70A3 /* definition.swift */; };
 		3907CE591AAEF8A500CD70A3 /* elementsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3907CE581AAEF8A500CD70A3 /* elementsTests.swift */; };
@@ -18,13 +17,16 @@
 		3927B71C1ABEAA680018D180 /* axiom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3927B71B1ABEAA680018D180 /* axiom.swift */; };
 		3927B71D1ABEC3C40018D180 /* axiom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3927B71B1ABEAA680018D180 /* axiom.swift */; };
 		3927B71E1ABFD8A70018D180 /* proposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396335E01ABAC99C001B7208 /* proposition.swift */; };
-		394411AA1AC50BDA0074D231 /* propsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394411A91AC50BDA0074D231 /* propsTest.swift */; };
 		396335E11ABAC99C001B7208 /* proposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396335E01ABAC99C001B7208 /* proposition.swift */; };
 		39D0F3181AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39D0F3191AAD6992003B56CE /* state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D0F3171AAD6992003B56CE /* state.swift */; };
 		39DB5C451AA6D2860069AA30 /* sparsec.h in Headers */ = {isa = PBXBuildFile; fileRef = 39DB5C441AA6D2860069AA30 /* sparsec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		39DB5C4B1AA6D2860069AA30 /* sparsec.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39DB5C3F1AA6D2860069AA30 /* sparsec.framework */; };
 		39DB5C521AA6D2860069AA30 /* sparsecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39DB5C511AA6D2860069AA30 /* sparsecTests.swift */; };
+		F1034A151ACE6C6B0017C1B0 /* defineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1034A141ACE6C6B0017C1B0 /* defineTests.swift */; };
+		F1034A171ACE75CB0017C1B0 /* propsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1034A161ACE75CB0017C1B0 /* propsTests.swift */; };
+		F1034A191ACE75E50017C1B0 /* atomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1034A181ACE75E50017C1B0 /* atomTests.swift */; };
+		F1F09AFA1ACE8F8600A56ADD /* combTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1F09AF91ACE8F8600A56ADD /* combTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,11 +41,9 @@
 
 /* Begin PBXFileReference section */
 		3907CE4C1AAEF2D200CD70A3 /* atom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = atom.swift; sourceTree = "<group>"; };
-		3907CE4E1AAEF38A00CD70A3 /* atomTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = atomTests.swift; path = ../sparsec/atomTests.swift; sourceTree = "<group>"; };
 		3907CE541AAEF7AC00CD70A3 /* definition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = definition.swift; sourceTree = "<group>"; };
 		3907CE581AAEF8A500CD70A3 /* elementsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = elementsTests.swift; sourceTree = "<group>"; };
 		3927B71B1ABEAA680018D180 /* axiom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = axiom.swift; sourceTree = "<group>"; };
-		394411A91AC50BDA0074D231 /* propsTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = propsTest.swift; sourceTree = "<group>"; };
 		396335E01ABAC99C001B7208 /* proposition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = proposition.swift; sourceTree = "<group>"; };
 		39A5F5F41AAC46F80050D65D /* parsec.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = parsec.playground; sourceTree = "<group>"; };
 		39C6B5071AB6B32000F566A0 /* combinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = combinator.swift; sourceTree = "<group>"; };
@@ -54,6 +54,10 @@
 		39DB5C4A1AA6D2860069AA30 /* sparsecTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = sparsecTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		39DB5C501AA6D2860069AA30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		39DB5C511AA6D2860069AA30 /* sparsecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sparsecTests.swift; sourceTree = "<group>"; };
+		F1034A141ACE6C6B0017C1B0 /* defineTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = defineTests.swift; path = sparsecTests/defineTests.swift; sourceTree = SOURCE_ROOT; };
+		F1034A161ACE75CB0017C1B0 /* propsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = propsTests.swift; sourceTree = "<group>"; };
+		F1034A181ACE75E50017C1B0 /* atomTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = atomTests.swift; sourceTree = "<group>"; };
+		F1F09AF91ACE8F8600A56ADD /* combTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = combTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,10 +124,12 @@
 		39DB5C4E1AA6D2860069AA30 /* sparsecTests */ = {
 			isa = PBXGroup;
 			children = (
-				3907CE4E1AAEF38A00CD70A3 /* atomTests.swift */,
+				F1034A141ACE6C6B0017C1B0 /* defineTests.swift */,
+				F1034A161ACE75CB0017C1B0 /* propsTests.swift */,
+				F1034A181ACE75E50017C1B0 /* atomTests.swift */,
+				F1F09AF91ACE8F8600A56ADD /* combTests.swift */,
 				3907CE581AAEF8A500CD70A3 /* elementsTests.swift */,
 				39DB5C511AA6D2860069AA30 /* sparsecTests.swift */,
-				394411A91AC50BDA0074D231 /* propsTest.swift */,
 				39DB5C4F1AA6D2860069AA30 /* Supporting Files */,
 			);
 			path = sparsecTests;
@@ -257,16 +263,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1034A151ACE6C6B0017C1B0 /* defineTests.swift in Sources */,
 				3923ADDD1AB9E2F600D3D0D4 /* atom.swift in Sources */,
 				3927B71E1ABFD8A70018D180 /* proposition.swift in Sources */,
+				F1034A191ACE75E50017C1B0 /* atomTests.swift in Sources */,
 				3907CE561AAEF7AC00CD70A3 /* definition.swift in Sources */,
 				39DB5C521AA6D2860069AA30 /* sparsecTests.swift in Sources */,
 				39D0F3191AAD6992003B56CE /* state.swift in Sources */,
 				3927B71D1ABEC3C40018D180 /* axiom.swift in Sources */,
 				3923ADDF1AB9EF9A00D3D0D4 /* combinator.swift in Sources */,
+				F1034A171ACE75CB0017C1B0 /* propsTests.swift in Sources */,
+				F1F09AFA1ACE8F8600A56ADD /* combTests.swift in Sources */,
 				3907CE591AAEF8A500CD70A3 /* elementsTests.swift in Sources */,
-				394411AA1AC50BDA0074D231 /* propsTest.swift in Sources */,
-				3907CE4F1AAEF38A00CD70A3 /* atomTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

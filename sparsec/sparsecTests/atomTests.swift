@@ -73,6 +73,32 @@ class atomTests: XCTestCase {
         var r:Int? = fmap(x, fmap(y, fun))
         XCTAssert(r!==35, "Except a int? is 35 but got \(r)")
     }
+
+    func testOne1() {
+        let data = "b"
+        let state = BasicState(data.unicodeScalars)
+        let c: UnicodeScalar = "b"
+        var (re, status) = one(c)(state)
+        switch status {
+        case .Success:
+            XCTAssert(true, "pass")
+        case let .Failed(msg):
+            XCTAssert(false)
+        }
+    }
+    
+    func testOne2() {
+        let data = " "
+        let state = BasicState(data.unicodeScalars)
+        let c: UnicodeScalar = " "
+        var (re, status) = one(c)(state)
+        switch status {
+        case .Success:
+            XCTAssert(true, "pass")
+        case let .Failed(msg):
+            XCTAssert(false)
+        }
+    }
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
