@@ -230,6 +230,22 @@ class combTests: XCTestCase {
             XCTAssert(true, msg)
         }
     }
+
+    func testOneOf3() {
+        let data = " "
+        let state = BasicState(data.unicodeScalars)
+        let c = "3fs 2ad1"
+        
+        var (re, status) = oneOf(c.unicodeScalars)(state)
+        
+        println("(re, status): \((re, status))")
+        switch status {
+        case .Success:
+            XCTAssert(true, "data \(data) is not in c \(c)")
+        case let .Failed(msg):
+            XCTAssert(false, msg)
+        }
+    }
     
     func testNoneOf1() {
         let data = "b"
@@ -263,6 +279,22 @@ class combTests: XCTestCase {
         }
     }
     
+    func testNoneOf3() {
+        let data = " "
+        let state = BasicState(data.unicodeScalars)
+        let c = "3fs 2a d1"
+        
+        var (re, status) = noneOf(c.unicodeScalars)(state)
+        
+        println("(re, status): \((re, status))")
+        switch status {
+        case .Success:
+            XCTAssert(false, "data \(data) is not in c \(c)")
+        case let .Failed(msg):
+            XCTAssert(true, msg)
+        }
+    }
+
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measureBlock() {
