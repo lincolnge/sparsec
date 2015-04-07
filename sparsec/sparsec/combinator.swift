@@ -154,6 +154,11 @@ func many<T, S:CollectionType >(p:Parsec<T, S>.Parser) -> Parsec<[T?], S>.Parser
     }
 }
 
+postfix operator >* { }
+postfix func >* <T, S:CollectionType>(p: Parsec<T, S>.Parser)  -> Parsec<[T?], S>.Parser {
+    return many(p)
+}
+
 func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser {
     var helper = {(start:T?)->Parsec<[T?], S>.Parser in
         return {(state:BasicState<S>)->([T?]?, ParsecStatus) in
@@ -172,6 +177,11 @@ func many1<T, S:CollectionType>(p: Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser 
     return p >>= helper
 }
 
+postfix operator >+ { }
+postfix func >+ <T, S:CollectionType>(p: Parsec<T, S>.Parser)  -> Parsec<[T?], S>.Parser {
+    return many(p)
+}
+
 func manyTil<T, TilType, S:CollectionType>(p:Parsec<T, S>.Parser,
         end:Parsec<TilType, S>.Parser)->Parsec<[T?], S>.Parser{
     var term = try(end) >> pack([T?]())
@@ -180,12 +190,36 @@ func manyTil<T, TilType, S:CollectionType>(p:Parsec<T, S>.Parser,
     })
 }
 
-func maybe<T, S>(p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
+func zeroOrOnce<T, S>(p:Parsec<T, S>.Parser)->Parsec<T, S>.Parser{
     return try(p) <|> pack(nil)
 }
 
-func skip<T, S>(p:Parsec<T, S>.Parser)->Parsec<[T?], S>.Parser{
-    return maybe(many(p))
+postfix operator >? { }
+postfix func >? <T, S:CollectionType>(x: Parsec<T, S>.Parser)  -> Parsec<T, S>.Parser {
+    return zeroOrOnce(x)
+}
+
+//parsec maybe curry
+func maybe<T, X, S>(m:T, p:Parsec<X, S>.Parser)-> ((X)->T)->Parsec<T, S>.Parser {
+    return {(f:(X)->T)->Parsec<T, S>.Parser in
+        return maybe(m, p, f)
+    }
+}
+
+func maybe<T, X, S>(m:T, p:Parsec<X, S>.Parser, f:(X)->T) -> Parsec<T, S>.Parser {
+    return {(state:BasicState<S>)->(T?, ParsecStatus) in
+        var (val, status) = p(state)
+        switch status {
+        case .Success:
+            if val != nil {
+                return (f(val!), .Success)
+            }else{
+                return (nil, .Success)
+            }
+        case .Failed:
+            return (nil, status)
+        }
+    }
 }
 
 func sepBy<T, SepType, S:CollectionType>(p: Parsec<T, S>.Parser,
